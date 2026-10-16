@@ -1,6 +1,5 @@
 ---
-title: "Dois-Zero"
-subtitle: "Análise de dados de futebol, principalmente em R."
+title: "DOIS-ZERO"
 listing:
   contents: posts
   sort: "date desc"

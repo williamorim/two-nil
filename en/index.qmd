@@ -1,6 +1,5 @@
 ---
-title: "Two-Nil"
-subtitle: "Football data analysis, mostly in R."
+title: "TWO-NIL"
 listing:
   contents: posts
   sort: "date desc"

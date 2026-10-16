@@ -39,9 +39,7 @@ website:
 
 format:
   html:
-    theme:
-      light: [flatly, assets/styles.scss]
-      dark: [darkly, assets/styles.scss]
+    theme: [simplex, assets/styles.scss]
     toc: true
     code-copy: true
     code-link: true
