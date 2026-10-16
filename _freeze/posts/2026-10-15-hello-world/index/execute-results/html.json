@@ -1,0 +1,17 @@
+{
+  "hash": "5934bb6e1d66e0e5f5dc2ed96ed5cb47",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Olá, mundo! Qual a chance de um 2 a 0?\"\ndescription: \"Primeiro post do Dois-Zero: um modelo de Poisson simples para estimar a probabilidade de cada placar.\"\ndate: 2026-10-15\ncategories: [R, modelagem, poisson]\n---\n\nBem-vindo ao **Dois-Zero**! Este é o primeiro post do blog, onde vou publicar\nanálises de dados de futebol, principalmente em R.\n\nPara começar, nada melhor do que responder à pergunta que dá nome ao blog:\n**qual a probabilidade de um jogo terminar 2 a 0?**\n\n## Um modelo simples\n\nUm ponto de partida clássico é supor que o número de gols de cada time segue\numa distribuição de Poisson, independente do adversário, com média igual aos\ngols esperados (xG) daquele time na partida.\n\nVamos imaginar um jogo em que o mandante tem xG de 1,6 e o visitante, 1,1.\n\n\n::: {.cell layout-align=\"center\"}\n\n```{.r .cell-code}\nlibrary(ggplot2)\nsource(here::here(\"R/theme_two_nil.R\"))\n\nxg_mandante <- 1.6\nxg_visitante <- 1.1\nmax_gols <- 5\n\nplacares <- expand.grid(\n  mandante = 0:max_gols,\n  visitante = 0:max_gols\n)\nplacares$prob <- dpois(placares$mandante, xg_mandante) *\n  dpois(placares$visitante, xg_visitante)\n```\n:::\n\n\nA probabilidade de um 2 a 0 para o mandante é:\n\n\n::: {.cell layout-align=\"center\"}\n\n```{.r .cell-code}\np_2_0 <- with(placares, prob[mandante == 2 & visitante == 0])\nscales::percent(p_2_0, accuracy = 0.1)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] \"8.6%\"\n```\n\n\n:::\n:::\n\n\n## Todos os placares\n\n\n::: {.cell layout-align=\"center\"}\n\n```{.r .cell-code}\nggplot(placares, aes(visitante, mandante, fill = prob)) +\n  geom_tile(colour = \"white\", linewidth = 0.8) +\n  geom_text(\n    aes(label = scales::percent(prob, accuracy = 0.1)),\n    size = 3.2,\n    colour = ifelse(placares$prob > 0.08, \"white\", \"grey20\")\n  ) +\n  annotate(\n    \"tile\", x = 0, y = 2, width = 1, height = 1,\n    fill = NA, colour = two_nil_colors[[\"ink\"]], linewidth = 1.2\n  ) +\n  scale_fill_gradient(low = two_nil_colors[[\"chalk\"]], high = two_nil_colors[[\"pitch\"]], guide = \"none\") +\n  scale_x_continuous(breaks = 0:max_gols, expand = c(0, 0)) +\n  scale_y_continuous(breaks = 0:max_gols, expand = c(0, 0)) +\n  coord_equal() +\n  labs(\n    title = \"Qual a chance de cada placar?\",\n    x = \"Gols do visitante\",\n    y = \"Gols do mandante\",\n    caption = \"Modelo de Poisson independente. Destaque: 2 a 0.\"\n  ) +\n  theme_two_nil() +\n  theme(panel.grid = element_blank())\n```\n\n::: {.cell-output-display}\n![Probabilidade de cada placar com xG de 1,6 (mandante) e 1,1 (visitante).](index_files/figure-html/fig-placares-1.png){#fig-placares fig-align='center' width=576}\n:::\n:::\n\n\nEsse modelo ignora muita coisa (correlação entre os gols dos dois times,\nestado do jogo, a tendência de placares baixos serem mais comuns do que a\nPoisson prevê…), mas é um ótimo ponto de partida. Nos próximos posts, a ideia\né usar dados reais e ir sofisticando as análises.\n\nAté a próxima!\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

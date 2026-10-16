@@ -1,0 +1,14 @@
+---
+title: "Dois-Zero"
+subtitle: "Análise de dados de futebol, principalmente em R."
+listing:
+  contents: posts
+  sort: "date desc"
+  type: default
+  categories: true
+  sort-ui: false
+  filter-ui: false
+  feed: true
+page-layout: full
+title-block-banner: true
+---

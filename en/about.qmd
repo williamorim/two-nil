@@ -1,0 +1,12 @@
+---
+title: "About"
+toc: false
+---
+
+**Two-Nil** is a football data analysis blog. Posts are written in
+[Quarto](https://quarto.org) and the analyses are done mostly in R.
+
+All the code is available on
+[GitHub](https://github.com/williamorim/two-nil).
+
+*Este blog também está disponível em [português](../about.html).*

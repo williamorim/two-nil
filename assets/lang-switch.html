@@ -1,0 +1,16 @@
+<script>
+// Troca de idioma: aponta o link "EN"/"PT" da navbar para a mesma página no
+// outro idioma. Convenção: os dois sites usam os mesmos caminhos
+// (posts/<slug>/ em pt-BR <-> en/posts/<slug>/ em inglês).
+(function () {
+  var link = document.querySelector(".navbar .bi-translate");
+  link = link && link.closest("a");
+  if (!link) return;
+  var offsetMeta = document.querySelector('meta[name="quarto:offset"]');
+  var siteRoot = new URL(offsetMeta ? offsetMeta.content : "./", window.location.href);
+  var rel = window.location.href.slice(siteRoot.href.length).split("#")[0];
+  var isEnglish = (document.documentElement.lang || "").toLowerCase().indexOf("en") === 0;
+  var target = new URL((isEnglish ? "../" : "en/") + rel, siteRoot);
+  link.setAttribute("href", target.href);
+})();
+</script>

@@ -1,0 +1,12 @@
+# Shared options for all English posts
+author: "William Amorim"
+title-block-banner: true
+toc: true
+execute:
+  echo: true
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    fig.align: center
+    dev: ragg_png

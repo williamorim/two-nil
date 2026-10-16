@@ -1,0 +1,49 @@
+# English site. Separate Quarto project rendered into `../_site/en/`.
+# Render the Portuguese (root) site first: `./render.sh` does both in order.
+project:
+  type: website
+  output-dir: ../_site/en
+
+lang: en
+
+website:
+  title: "Two-Nil"
+  description: "Football data analysis, mostly in R."
+  site-url: https://williamorim.github.io/two-nil/en/
+  repo-url: https://github.com/williamorim/two-nil
+  favicon: ../assets/favicon.svg
+  open-graph: true
+  navbar:
+    logo: ../assets/favicon.svg
+    left:
+      - href: index.qmd
+        text: Posts
+      - href: about.qmd
+        text: About
+    right:
+      - icon: translate
+        text: "PT"
+        href: index.qmd
+        aria-label: "Ler em português"
+      - icon: rss
+        href: index.xml
+        aria-label: RSS
+      - icon: github
+        href: https://github.com/williamorim/two-nil
+        aria-label: GitHub
+  page-footer:
+    center: "Two-Nil · Football data analysis"
+
+format:
+  html:
+    theme:
+      light: [flatly, ../assets/styles.scss]
+      dark: [darkly, ../assets/styles.scss]
+    toc: true
+    code-copy: true
+    code-link: true
+    highlight-style: github
+    include-after-body: ../assets/lang-switch.html
+
+execute:
+  freeze: auto

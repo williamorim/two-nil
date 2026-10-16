@@ -1,0 +1,16 @@
+/*-- scss:defaults --*/
+$pitch-green: #1b7a3d;
+
+$primary: $pitch-green;
+$link-color: $pitch-green;
+$font-family-sans-serif: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+/*-- scss:rules --*/
+.navbar-title {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.navbar .bi-translate + .menu-text {
+  font-weight: 600;
+}

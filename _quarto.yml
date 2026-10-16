@@ -1,0 +1,52 @@
+# Site em português (raiz). A versão em inglês é um projeto Quarto separado
+# em `en/`, renderizado em `_site/en/`. Use `./render.sh` para gerar os dois.
+project:
+  type: website
+  output-dir: _site
+  render:
+    - "*.qmd"
+    - "!en/"
+
+lang: pt-BR
+
+website:
+  title: "Dois-Zero"
+  description: "Análise de dados de futebol, principalmente em R."
+  site-url: https://williamorim.github.io/two-nil/
+  repo-url: https://github.com/williamorim/two-nil
+  favicon: assets/favicon.svg
+  open-graph: true
+  navbar:
+    logo: assets/favicon.svg
+    left:
+      - href: index.qmd
+        text: Posts
+      - href: about.qmd
+        text: Sobre
+    right:
+      - icon: translate
+        text: "EN"
+        href: index.qmd
+        aria-label: "Read in English"
+      - icon: rss
+        href: index.xml
+        aria-label: RSS
+      - icon: github
+        href: https://github.com/williamorim/two-nil
+        aria-label: GitHub
+  page-footer:
+    center: "Dois-Zero · Análise de dados de futebol"
+
+format:
+  html:
+    theme:
+      light: [flatly, assets/styles.scss]
+      dark: [darkly, assets/styles.scss]
+    toc: true
+    code-copy: true
+    code-link: true
+    highlight-style: github
+    include-after-body: assets/lang-switch.html
+
+execute:
+  freeze: auto
