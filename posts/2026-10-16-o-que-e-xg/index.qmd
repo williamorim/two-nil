@@ -1,7 +1,8 @@
 ---
 title: "O que é xG?"
 date: 2026-10-16
-categories: [R, metricas]
+description: "Breve explicação sobre o uso do xG no futebol, com exemplos."
+categories: [R, métricas]
 ---
 
 A métrica xG fornece a probabilidade de uma finalização resultar em gol. 
@@ -12,11 +13,11 @@ Ela **não leva em conta quem finalizou**.
 
 O termo vem de "expected goals", que em português significa "gols esperados". Se somarmos o xG de todas as finalizações de um time em uma partida, teremos uma estimativa de quantos gols esse time deveria ter marcado.
 
-Se um time obteve um xG total de 1,5 em um partida, não sabemos dizer se ele finalizou algumas chances claras ou se finalizou diversas chances de baixa qualidade.
+Se um time obteve um xG total de 1,5 em uma partida, não sabemos dizer se ele finalizou algumas chances claras ou se finalizou diversas chances de baixa qualidade.
 
 Uma medida bastante utilizada para avaliar a qualidade das chances é o xG da partida dividido pelo número de finalizações. Isso nos dá uma ideia do quão boas foram, em média, as chances criadas por um time.
 
-Vamos ver um exemplo utilizando a Copa do Mundo masculina de 2022. O código abaixo pega os dados de evento do StatsBomb.
+Vamos ver um exemplo utilizando a Copa do Mundo masculina de 2022. O código abaixo obtém os dados de eventos do StatsBomb.
 
 ```{r}
 library(kickoff)
@@ -28,7 +29,7 @@ sb_competitions <- kickoff::sb_open_competitions()
 # Get 2022 World Cup
 wc_2022 <- sb_competitions |>
   filter(
-    sb_competitions$competition_name == "FIFA World Cup",
+    competition_name == "FIFA World Cup",
     competition_gender == "male",
     season_name == 2022
   )
@@ -55,15 +56,25 @@ final_match_xg <- wc_2022_events |>
   summarise(match_xg = sum(shot.statsbomb_xg, na.rm = TRUE))
 ```
 
-Na final, a Argentina obteve um xG total de `r final_match_xg$match_xg[final_match_xg$team.name == "Argentina"]`, enquanto o da França foi de `r final_match_xg$match_xg[final_match_xg$team.name == "France"]`. Veja que consideramos apenas os tempos normais e a prorrogação, excluindo a disputa de pênaltis.
+```{r}
+#| echo: false
+
+arg_xg <- final_match_xg$match_xg[final_match_xg$team.name == "Argentina"]
+arg_xg <- format(round(arg_xg, 2), decimal.mark = ",")
+
+fra_xg <- final_match_xg$match_xg[final_match_xg$team.name == "France"]
+fra_xg <- format(round(fra_xg, 2), decimal.mark = ",")
+```
+
+Na final, a Argentina obteve um xG total de `r arg_xg`, enquanto o da França foi de `r fra_xg`. Veja que consideramos apenas os tempos normais e a prorrogação, excluindo a disputa de pênaltis.
 
 Ambas as seleções fizeram mais gols do que o esperado pelo xG (a partida foi 3x3). 
 
 Isso não é por acaso! 
 
-Como o xG de uma finalização é uma probabilidade calculada a partir de uma média histórica de finalizações parecidas, é esperado que bons times performem acima do xG.
+Como o xG de uma finalização é uma probabilidade calculada a partir de uma média histórica de finalizações parecidas, é esperado que bons times tenham desempenho acima do xG.
 
-O gráfico abaixo mostra o xG de cada seleção em todo o torneio versus o número de gols marcados (excluindo gols contra). Times em verde, acima da linha pontilhada, marcaram mais gols do que o esperado pelo xG, enquanto times em vermelho marcaram menos.
+O gráfico abaixo mostra o xG de cada seleção em todo o torneio versus o número de gols marcados (excluindo gols contra). Times em verde, acima da linha tracejada, marcaram mais gols do que o esperado pelo xG, enquanto times em vermelho marcaram menos.
 
 ```{r}
 library(ggplot2)
@@ -82,7 +93,7 @@ wc_2022_goals_vs_xg |>
     fill = ifelse(goals > total_xg, "lightgreen", "lightcoral")
   ) |>
   ggplot(aes(x = total_xg, y = goals, label = team.name, fill = I(fill))) +
-  ggrepel::geom_label_repel() +
+  ggrepel::geom_label_repel(max.overlaps = 30) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
   labs(
     title = "Goals vs Expected Goals (xG) - 2022 World Cup",
