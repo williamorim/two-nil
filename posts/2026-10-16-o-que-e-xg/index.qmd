@@ -2,14 +2,14 @@
 title: "O que é xG?"
 date: 2026-10-16
 description: "Breve explicação sobre o uso do xG no futebol, com exemplos."
-categories: [R, métricas]
+categories: [métricas]
 ---
 
 A métrica xG fornece a probabilidade de uma finalização resultar em gol. 
 
-Essa probabilidade é calculada com base em diversas características da finalização, como a posição no campo, o ângulo do chute, o número de adversários próximos, o tipo de assistência recebida, a parte do corpo utilizada para finalizar, entre outras.
+Essa probabilidade é calculada com base em diversas características da finalização, como a posição da bola no campo, o ângulo do chute, o número de adversários próximos, o tipo de assistência recebida, a parte do corpo utilizada para finalizar, entre outras.
 
-Ela **não leva em conta quem finalizou**.
+**Ela não leva em conta quem finalizou**.
 
 O termo vem de "expected goals", que em português significa "gols esperados". Se somarmos o xG de todas as finalizações de um time em uma partida, teremos uma estimativa de quantos gols esse time deveria ter marcado.
 
@@ -66,7 +66,7 @@ fra_xg <- final_match_xg$match_xg[final_match_xg$team.name == "France"]
 fra_xg <- format(round(fra_xg, 2), decimal.mark = ",")
 ```
 
-Na final, a Argentina obteve um xG total de `r arg_xg`, enquanto o da França foi de `r fra_xg`. Veja que consideramos apenas os tempos normais e a prorrogação, excluindo a disputa de pênaltis.
+Na final, a Argentina obteve um xG total de `r arg_xg`, enquanto o da França foi de `r fra_xg`. Veja que consideramos apenas o tempo normal e a prorrogação, excluindo a disputa de pênaltis.
 
 Ambas as seleções fizeram mais gols do que o esperado pelo xG (a partida foi 3x3). 
 

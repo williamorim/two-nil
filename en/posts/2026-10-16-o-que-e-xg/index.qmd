@@ -2,14 +2,14 @@
 title: "What is xG?"
 date: 2026-10-16
 description: "A brief explanation of how xG is used in football, with examples."
-categories: [R, metrics]
+categories: [metrics]
 ---
 
 The xG metric gives the probability of a shot resulting in a goal.
 
-This probability is calculated from several characteristics of the shot, such as its position on the pitch, the shooting angle, the number of nearby opponents, the type of assist received, the body part used to shoot, among others.
+This probability is calculated from several characteristics of the shot, such as the position of the ball on the pitch, the shooting angle, the number of nearby opponents, the type of assist received, the body part used to shoot, among others.
 
-It **does not take into account who took the shot**.
+**It does not take into account who took the shot**.
 
 The term stands for "expected goals". If we add up the xG of all of a team's shots in a match, we get an estimate of how many goals that team should have scored.
 

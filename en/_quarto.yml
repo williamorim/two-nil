@@ -7,14 +7,16 @@ project:
 lang: en
 
 website:
-  title: "Two-Nil"
+  title: "2–0"
   description: "Football data analysis, mostly in R."
   site-url: https://williamorim.github.io/two-nil/en/
   repo-url: https://github.com/williamorim/two-nil
   favicon: ../assets/favicon.svg
   open-graph: true
   navbar:
+    title: false
     logo: ../assets/favicon.svg
+    logo-alt: "2–0"
     left:
       - href: index.qmd
         text: Posts
@@ -32,7 +34,7 @@ website:
         href: https://github.com/williamorim/two-nil
         aria-label: GitHub
   page-footer:
-    center: "Two-Nil · Football data analysis"
+    center: "2–0 · Football data analysis"
 
 format:
   html:

@@ -1,4 +1,4 @@
-# Dois-Zero · Two-Nil
+# 2–0 · Two-Nil
 
 Blog de análise de dados de futebol, principalmente em R, feito com
 [Quarto](https://quarto.org). Bilíngue: português (padrão) e inglês.
@@ -9,12 +9,12 @@ Blog de análise de dados de futebol, principalmente em R, feito com
 ## Estrutura
 
 ```
-_quarto.yml          site em pt-BR (Dois-Zero) → _site/
+_quarto.yml          site em pt-BR (2–0) → _site/
 index.qmd            listagem de posts
 about.qmd
 posts/<slug>/index.qmd
 en/
-  _quarto.yml        site em inglês (Two-Nil) → _site/en/
+  _quarto.yml        site em inglês (2–0) → _site/en/
   index.qmd
   about.qmd
   posts/<slug>/index.qmd

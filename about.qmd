@@ -3,7 +3,7 @@ title: "Sobre"
 toc: false
 ---
 
-**Dois-Zero** é um blog de análise de dados de futebol. Os posts são escritos
+**2–0** é um blog de análise de dados de futebol. Os posts são escritos
 em [Quarto](https://quarto.org) e as análises são feitas principalmente em R.
 
 Todo o código está disponível no

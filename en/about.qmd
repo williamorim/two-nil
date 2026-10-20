@@ -3,7 +3,7 @@ title: "About"
 toc: false
 ---
 
-**Two-Nil** is a football data analysis blog. Posts are written in
+**2–0** is a football data analysis blog. Posts are written in
 [Quarto](https://quarto.org) and the analyses are done mostly in R.
 
 All the code is available on

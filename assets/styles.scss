@@ -10,3 +10,17 @@
 .navbar .bi-translate + .menu-text {
   font-weight: 600;
 }
+
+.navbar-brand .navbar-logo {
+  height: 36px;
+  max-height: 36px;
+  border-radius: 6px;
+}
+
+div.quarto-post .listing-categories {
+  margin-top: 0.5rem;
+
+  .listing-category {
+    font-size: 0.55em;
+  }
+}
