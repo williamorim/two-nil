@@ -9,7 +9,7 @@ lang: en
 website:
   title: "2–0"
   description: "Football data analysis, mostly in R."
-  site-url: https://williamorim.github.io/two-nil/en/
+  site-url: https://twonil.wamorim.com/en/
   repo-url: https://github.com/williamorim/two-nil
   favicon: ../assets/favicon.svg
   open-graph: true
