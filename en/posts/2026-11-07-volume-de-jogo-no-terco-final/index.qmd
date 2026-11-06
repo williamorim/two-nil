@@ -1,0 +1,158 @@
+---
+title: "Final-third volume"
+date: 2026-11-07
+description: "A minute-by-minute bar chart to visualize which team dominated each stretch of a match, using StatsBomb event data."
+categories: [visualization, event data]
+---
+
+In this post, we'll build a simple chart to visualize each team's attacking volume in the 2022 World Cup final between Argentina and France.
+
+## The idea
+
+One way to measure "attacking volume" is to count how many offensive actions a team performs in the final third of the pitch, that is, the third closest to the opponent's goal. We'll consider passes, dribbles and shots that start in that region.
+
+In StatsBomb's coordinate system, the pitch is 120 x 80 units and the attack always goes from left to right. So the final third corresponds to `x >= 80` for either team.
+
+## The data
+
+We'll get the final's events with the [kickoff](https://github.com/williamorim/kickoff) package.
+
+```{r}
+# remotes::install_github("williamorim/kickoff")
+library(kickoff)
+library(dplyr)
+
+sb_competitions <- sb_open_competitions()
+
+wc_2022 <- sb_competitions |>
+  filter(
+    competition_name == "FIFA World Cup",
+    competition_gender == "male",
+    season_name == 2022
+  )
+
+final_match <- sb_open_matches(wc_2022) |>
+  filter(competition_stage.name == "Final")
+
+final_match_events <- sb_open_events(final_match)
+```
+
+Now we filter the actions we're interested in. The `location` column is a list with the `x` and `y` coordinates of each event, so we use `purrr::map_dbl()` to extract the `x`. We also leave out the penalty shootout (`period == 5`).
+
+```{r}
+final_third_actions <- final_match_events |>
+  filter(
+    period %in% 1:4,
+    type.name %in% c("Pass", "Dribble", "Shot")
+  ) |>
+  mutate(x = purrr::map_dbl(location, 1)) |>
+  filter(x >= 80) |>
+  select(period, minute, second, team.name, player.name, type.name, x)
+
+final_third_actions |>
+  count(team.name, type.name)
+```
+
+## The stoppage-time problem
+
+We want a chart with the match minute on the x axis. But the `minute` column has a catch: first-half stoppage time (45, 46, 47...) uses the same minutes as the start of the second half. The same happens between the second half and extra time, and between the two halves of extra time.
+
+```{r}
+final_match_events |>
+  filter(period %in% 1:4) |>
+  group_by(period) |>
+  summarise(start = min(minute), end = max(minute))
+```
+
+Note that the first half runs until minute 52, while the second half starts at 45. If we used `minute` directly, the bar for minute 46 would add first-half stoppage time to the start of the second half.
+
+The solution is to create a continuous match minute: we shift each period by the accumulated duration of the previous periods.
+
+```{r}
+periods <- final_match_events |>
+  filter(period %in% 1:4) |>
+  group_by(period) |>
+  summarise(start = min(minute), end = max(minute)) |>
+  mutate(
+    duration = end - start + 1,
+    continuous_start = cumsum(duration) - duration,
+    label = case_when(
+      period == 1 ~ "1st half",
+      period == 2 ~ "2nd half",
+      period == 3 ~ "Extra time",
+      TRUE ~ ""
+    )
+  )
+
+periods
+```
+
+With this table, the continuous minute of an event is `minute - start + continuous_start`.
+
+## Counting the actions
+
+Now we count the actions by team and by minute. So that both teams appear in the same chart, one on each side of the axis, we put France on the positive axis and Argentina on the negative one.
+
+```{r}
+volume <- final_third_actions |>
+  left_join(periods, by = "period") |>
+  mutate(continuous_minute = minute - start + continuous_start) |>
+  count(team.name, continuous_minute, name = "actions") |>
+  mutate(
+    actions = ifelse(team.name == "France", actions, -actions)
+  )
+
+volume
+```
+
+## The chart
+
+Each bar represents one minute of the match. Note that the x axis is the continuous minute, which includes stoppage time, so it goes past 120. The dashed lines mark the start of each period. Since the sign of the bars is just a visual trick, we use `labels = abs` on the y axis to avoid showing negative numbers (and then hide the axis altogether, because what matters is the comparison between the two halves, not the scale).
+
+```{r}
+#| fig-width: 9
+#| fig-height: 5
+library(ggplot2)
+
+boundaries <- periods |>
+  filter(period > 1) |>
+  mutate(x = continuous_start - 0.5)
+
+volume |>
+  ggplot(aes(x = continuous_minute, y = actions, fill = team.name)) +
+  geom_col(width = 0.9) +
+  geom_hline(yintercept = 0, colour = "grey30") +
+  geom_vline(
+    data = boundaries,
+    aes(xintercept = x),
+    linetype = "dashed",
+    colour = "grey50"
+  ) +
+  scale_fill_manual(
+    values = c("France" = "#0055A4", "Argentina" = "#75AADB"),
+    name = NULL
+  ) +
+  scale_x_continuous(breaks = seq(0, 135, by = 15)) +
+  scale_y_continuous(labels = abs) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    panel.grid = element_blank(),
+    axis.title = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  labs(
+    title = "Final-third actions per minute: Argentina vs France",
+    subtitle = "Passes, dribbles and shots starting in the final third. 2022 World Cup final.",
+    caption = "Data: StatsBomb Open Data"
+  )
+```
+
+This same chart lends itself to several variations:
+
+- keep only actions that start and end in the final third;
+- use 5-minute windows instead of 1 to smooth the bars;
+- give shots more weight than passes and dribbles;
+- keep only completed passes, or only actions inside the box, for a stricter definition of "dominance".
+
+Choosing which metric should represent volume is your main challenge as a data analyst. Ask yourself who will receive the chart and what information that person wants to get from it.

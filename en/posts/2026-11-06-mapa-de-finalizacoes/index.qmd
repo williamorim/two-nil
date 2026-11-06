@@ -1,0 +1,141 @@
+---
+title: "Shot maps in R"
+date: 2026-11-06
+description: "How to draw a pitch with a team's shots using ggplot2 and ggsoccer."
+categories: [visualization, event data]
+---
+
+A shot map is a pitch with one point for each shot, showing where it was taken from, what the outcome was and, often, the xG of the chance.
+
+In this post, we'll build this chart from scratch for France's shots in the 2022 World Cup final, using StatsBomb open event data.
+
+## The data
+
+Event data describes every action in a match (passes, shots, dribbles, tackles etc.) with information such as the minute, the player, the team and the position of the ball on the pitch. We'll get the data with the [kickoff](https://github.com/williamorim/kickoff) package, keeping only the final.
+
+```{r}
+# remotes::install_github("williamorim/kickoff")
+library(kickoff)
+library(dplyr)
+
+sb_competitions <- sb_open_competitions()
+
+wc_2022 <- sb_competitions |>
+  filter(
+    competition_name == "FIFA World Cup",
+    competition_gender == "male",
+    season_name == 2022
+  )
+
+final_match <- sb_open_matches(wc_2022) |>
+  filter(competition_stage.name == "Final")
+
+final_match_events <- sb_open_events(final_match)
+```
+
+Each row of `final_match_events` is an event. Shots are the events with `type.name == "Shot"`. Besides the position the ball was struck from (the `location` column), StatsBomb records where it ended up (`shot.end_location`), the xG (`shot.statsbomb_xg`) and the outcome (`shot.outcome.name`).
+
+```{r}
+final_match_events |>
+  filter(type.name == "Shot") |>
+  select(
+    period, minute, team.name, player.name,
+    location, shot.end_location,
+    shot.statsbomb_xg, shot.outcome.name
+  ) |>
+  glimpse()
+```
+
+## Preparing the table
+
+The `location` and `shot.end_location` columns are lists: each element holds a vector with the `x` and `y` coordinates. To use them in ggplot2, we need to split these coordinates into numeric columns. We do that with `purrr::map_dbl()`.
+
+We'll also keep only France's shots in regular time and extra time (`period %in% 1:4`), leaving out the penalty shootout (`period == 5`).
+
+```{r}
+france_shots <- final_match_events |>
+  filter(
+    type.name == "Shot",
+    team.name == "France",
+    period %in% 1:4
+  ) |>
+  mutate(
+    x = purrr::map_dbl(location, 1),
+    y = purrr::map_dbl(location, 2),
+    end_x = purrr::map_dbl(shot.end_location, 1),
+    end_y = purrr::map_dbl(shot.end_location, 2),
+    outcome = ifelse(shot.outcome.name == "Goal", "Goal", "No goal")
+  ) |>
+  select(
+    period, minute, player.name, x, y, end_x, end_y,
+    xg = shot.statsbomb_xg,
+    outcome, shot.outcome.name, shot.body_part.name
+  )
+
+glimpse(france_shots)
+```
+
+France took only `r nrow(france_shots)` shots in 120 minutes, and none of them in the first half. Two of those shots are the penalties converted by Mbappé, which appear with the same position and the same xG (`r round(max(france_shots$xg), 2)`).
+
+## Drawing the pitch
+
+The [ggsoccer](https://github.com/Torvaney/ggsoccer) package adds to ggplot2 the `annotate_pitch()` function, which draws the pitch lines, and the `theme_pitch()` theme, which removes axes and grids.
+
+One important detail: each data provider uses a different coordinate system. At StatsBomb, the pitch is 120 x 80 units and the attack always goes from left to right. ggsoccer already ships these dimensions in the `pitch_statsbomb` object.
+
+```{r}
+library(ggplot2)
+library(ggsoccer)
+
+ggplot() +
+  annotate_pitch(dimensions = pitch_statsbomb, colour = "grey60", fill = "white") +
+  theme_pitch()
+```
+
+## The shot map
+
+Now we just need to add the layers with the data:
+
+- `geom_segment()` draws an arrow from the shot position to where the ball ended up;
+- `geom_point()` marks the shot location, with size proportional to the xG and colour indicating whether it was a goal.
+
+Since we only want to see the attacking half, we use `coord_flip(xlim = c(60, 121))`. `coord_flip()` turns the pitch vertical, with the opponent's goal at the top, and `xlim` crops the view at the halfway line.
+
+```{r}
+#| fig-width: 7
+#| fig-height: 8
+france_shots |>
+  ggplot() +
+  annotate_pitch(dimensions = pitch_statsbomb, colour = "grey60", fill = "white") +
+  geom_segment(
+    aes(x = x, y = y, xend = end_x, yend = end_y),
+    arrow = arrow(length = unit(0.15, "cm"), type = "closed"),
+    colour = "grey40",
+    linewidth = 0.4
+  ) +
+  geom_point(
+    aes(x = x, y = y, size = xg, fill = outcome),
+    shape = 21,
+    colour = "black",
+    alpha = 0.85
+  ) +
+  scale_size_continuous(range = c(2, 10), name = "xG") +
+  scale_fill_manual(values = c("Goal" = "#c0392b", "No goal" = "grey80"), name = NULL) +
+  guides(fill = guide_legend(override.aes = list(size = 4))) +
+  coord_flip(xlim = c(60, 121)) +
+  theme_pitch() +
+  theme(legend.position = "bottom") +
+  labs(
+    title = "France's shots in the 2022 World Cup final",
+    subtitle = "Point size proportional to xG. The arrow shows where the ball ended up.",
+    caption = "Data: StatsBomb Open Data"
+  )
+```
+
+To make the same chart for another team or another match, just change the filters on `team.name` and `final_match`.
+
+A few things worth noting:
+
+- Penalties tend to dominate any shot map, and sometimes it's worth removing them to look only at open play.
+- Penalties aside, the highest-xG shot was Kolo Muani's at the end of extra time, the famous Martínez save.
+- France's third goal (Mbappé's second) came from a low-xG shot, a first-time volley after Thuram's cross. It's the typical goal where the finish was better than the chance created. In cases like this, it's also worth looking at PSxG (Post-Shot Expected Goals), which estimates the probability of a shot being a goal after it has been taken.
